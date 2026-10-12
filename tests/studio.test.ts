@@ -11,6 +11,7 @@ describe('StudioApp & InspectorPanel', () => {
     expect(screen.getByText(/Metadata-Driven Mascot Framework/i)).toBeDefined();
     expect(screen.getByText(/Agency Early Access Registration/i)).toBeDefined();
     expect(screen.getByText(/Telemetry Stream/i)).toBeDefined();
+    expect(screen.getByTestId('floating-mascot-companion')).toBeDefined();
   });
 
   it('switches between inspector tabs correctly', () => {

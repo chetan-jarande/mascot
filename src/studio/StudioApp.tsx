@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { HeaderBar } from './components/HeaderBar';
 import { PlaygroundForm } from './components/PlaygroundForm';
 import { InspectorPanel } from './components/inspector/InspectorPanel';
-import { GuideBubble } from '../framework/components/GuideBubble';
+import { FloatingMascotCompanion } from '../framework/components/FloatingMascotCompanion';
 import { NativeSpotlight } from '../framework/components/NativeSpotlight';
 import { useGuideStore } from '../framework/store/guideStore';
 import { initMascots } from '../mascots/initMascots';
@@ -41,16 +41,16 @@ export const StudioApp: React.FC = () => {
       {/* Top Header Bar */}
       <HeaderBar />
 
+      {/* Living Spatial Floating Mascot Companion */}
+      <FloatingMascotCompanion />
+
       {/* Pluggable Native SVG Spotlight Overlay */}
       <NativeSpotlight />
 
       {/* Main Studio Workspace Grid */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10 items-start">
-        {/* Left Column: Live Companion & Interactive Sandbox */}
+        {/* Left Column: Live Interactive Sandbox Form */}
         <div className="lg:col-span-6 space-y-6">
-          {/* Guide Mascot Bubble (docked preview) */}
-          <GuideBubble className="w-full" />
-
           {/* Interactive Form Component */}
           <PlaygroundForm />
         </div>
