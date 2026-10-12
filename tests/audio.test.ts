@@ -10,6 +10,7 @@ describe('SynthAudio Procedural Synthesizer', () => {
 
   afterEach(() => {
     (window as any).AudioContext = originalAudioContext;
+    (synthAudio as any).ctx = null;
   });
 
   it('toggles and manages mute state with persistence', () => {
