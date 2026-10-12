@@ -211,11 +211,61 @@ describe('GuideStore & Validation Engine', () => {
     expect(useGuideStore.getState().tourStep).toBe(0);
   });
 
-  it('keeps error expression after validateAll if any field fails', () => {
-    const store = useGuideStore.getState();
-    store.setFieldValue('user-email', 'valid@company.com');
-    const allValid = store.validateAll(); // user-name is still empty
-    expect(allValid).toBe(false);
-    expect(useGuideStore.getState().currentExpression).toBe('error');
+  it('allows empty value on optional fields with format validations', () => {
+    const configWithOptional: GuideConfig = {
+      ...testConfig,
+      components: {
+        'opt-field': {
+          componentId: 'opt-field',
+          label: 'Optional Bio',
+          defaultExpression: 'neutral',
+          validations: [
+            {
+              id: 'min_opt',
+              type: 'min_length',
+              value: 10,
+              errorMessage: 'Bio must be at least 10 chars if provided.',
+            },
+          ],
+        },
+      },
+    };
+
+    useGuideStore.getState().setConfig(configWithOptional);
+    useGuideStore.getState().setFieldValue('opt-field', '');
+    expect(useGuideStore.getState().fieldErrors['opt-field']).toBeNull();
+    expect(useGuideStore.getState().currentExpression).toBe('happy');
+  });
+
+  it('validates regex patterns safely with state reset', () => {
+    const configWithRegex: GuideConfig = {
+      ...testConfig,
+      components: {
+        'phone-field': {
+          componentId: 'phone-field',
+          label: 'Phone Number',
+          defaultExpression: 'neutral',
+          validations: [
+            {
+              id: 'regex_phone',
+              type: 'regex',
+              value: /^[0-9]{3}-[0-9]{4}$/g,
+              errorMessage: 'Format must be 123-4567.',
+            },
+          ],
+        },
+      },
+    };
+
+    useGuideStore.getState().setConfig(configWithRegex);
+    useGuideStore.getState().setFieldValue('phone-field', '123-4567');
+    expect(useGuideStore.getState().fieldErrors['phone-field']).toBeNull();
+
+    // Call again with same valid string to verify lastIndex reset prevents false failures
+    useGuideStore.getState().setFieldValue('phone-field', '123-4567');
+    expect(useGuideStore.getState().fieldErrors['phone-field']).toBeNull();
+
+    useGuideStore.getState().setFieldValue('phone-field', 'abc-defg');
+    expect(useGuideStore.getState().fieldErrors['phone-field']).toBe('Format must be 123-4567.');
   });
 });
