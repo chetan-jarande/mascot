@@ -21,7 +21,10 @@ export class SynthAudio {
 
   private getContext(): AudioContext | null {
     if (typeof window === 'undefined') return null;
-    if (!this.ctx || this.ctx.state === 'closed') {
+    if (this.ctx && this.ctx.state === 'closed') {
+      this.ctx = null;
+    }
+    if (!this.ctx) {
       try {
         const AudioContextClass =
           window.AudioContext ||

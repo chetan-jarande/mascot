@@ -1,9 +1,15 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { synthAudio } from '../src/framework/audio/synthAudio';
 
 describe('SynthAudio Procedural Synthesizer', () => {
+  const originalAudioContext = (window as any).AudioContext;
+
   beforeEach(() => {
     synthAudio.setMuted(false);
+  });
+
+  afterEach(() => {
+    (window as any).AudioContext = originalAudioContext;
   });
 
   it('toggles and manages mute state with persistence', () => {
@@ -60,11 +66,9 @@ describe('SynthAudio Procedural Synthesizer', () => {
     expect(mockGain.connect).toHaveBeenCalled();
     expect(mockOsc.start).toHaveBeenCalledWith(10);
 
-    // Call onended
-    if (mockOsc.onended) {
-      mockOsc.onended();
-      expect(mockOsc.disconnect).toHaveBeenCalled();
-      expect(mockGain.disconnect).toHaveBeenCalled();
-    }
+    expect(mockOsc.onended).toBeDefined();
+    mockOsc.onended!();
+    expect(mockOsc.disconnect).toHaveBeenCalled();
+    expect(mockGain.disconnect).toHaveBeenCalled();
   });
 });
