@@ -39,18 +39,20 @@ export const NovaMascot: React.FC<MascotRendererProps> = ({
 
   useEffect(() => {
     let rafId: number | null = null;
+    let latestE: MouseEvent | null = null;
 
     const handleMouseMove = (e: MouseEvent) => {
+      latestE = e;
       if (rafId !== null) return;
       rafId = window.requestAnimationFrame(() => {
         rafId = null;
-        if (!containerRef.current) return;
+        if (!containerRef.current || !latestE) return;
         const rect = containerRef.current.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
 
-        const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
-        const dist = Math.min(7, Math.hypot(e.clientX - centerX, e.clientY - centerY) / 28);
+        const angle = Math.atan2(latestE.clientY - centerY, latestE.clientX - centerX);
+        const dist = Math.min(7, Math.hypot(latestE.clientX - centerX, latestE.clientY - centerY) / 28);
 
         setMousePos({
           x: Math.cos(angle) * dist,
