@@ -69,6 +69,7 @@ const testConfig: GuideConfig = {
 
 describe('GuideStore & Validation Engine', () => {
   beforeEach(() => {
+    validationRegistry.clear();
     useGuideStore.getState().initialize(testConfig);
     useGuideStore.getState().resetForm();
   });
@@ -189,5 +190,32 @@ describe('GuideStore & Validation Engine', () => {
     store.endTour();
     state = useGuideStore.getState();
     expect(state.tourActive).toBe(false);
+  });
+
+  it('sets error message and expression on focus when field has existing error', () => {
+    const store = useGuideStore.getState();
+    store.setFieldValue('user-name', '  '); // triggers error
+    store.setActiveComponent(null); // blur
+
+    store.setActiveComponent('user-name'); // re-focus
+    const state = useGuideStore.getState();
+    expect(state.activeComponentId).toBe('user-name');
+    expect(state.currentExpression).toBe('error');
+    expect(state.currentMessage).toBe('Name is required.');
+  });
+
+  it('does not advance tour step if tour is inactive', () => {
+    const store = useGuideStore.getState();
+    expect(store.tourActive).toBe(false);
+    store.nextTourStep();
+    expect(useGuideStore.getState().tourStep).toBe(0);
+  });
+
+  it('keeps error expression after validateAll if any field fails', () => {
+    const store = useGuideStore.getState();
+    store.setFieldValue('user-email', 'valid@company.com');
+    const allValid = store.validateAll(); // user-name is still empty
+    expect(allValid).toBe(false);
+    expect(useGuideStore.getState().currentExpression).toBe('error');
   });
 });

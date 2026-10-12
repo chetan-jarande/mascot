@@ -120,6 +120,8 @@ export const useGuideStore = create<GuideState>((set, get) => ({
       } else {
         set({
           activeComponentId: componentId,
+          currentMessage: existingError,
+          currentExpression: 'error',
         });
       }
       get().logTelemetry(componentId, 'focus');
@@ -147,14 +149,22 @@ export const useGuideStore = create<GuideState>((set, get) => ({
 
       if (rule.type === 'required') {
         isInvalid = !value.trim();
+      } else if (!value.trim()) {
+        // Skip format validation if empty and not required
+        continue;
       } else if (rule.type === 'min_length') {
         const minLen = Number(rule.value) || 0;
         isInvalid = value.length < minLen;
       } else if (rule.type === 'email') {
         isInvalid = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
       } else if (rule.type === 'regex') {
-        const regex = rule.value instanceof RegExp ? rule.value : new RegExp(String(rule.value));
-        isInvalid = !regex.test(value);
+        try {
+          const regex = rule.value instanceof RegExp ? rule.value : new RegExp(String(rule.value));
+          regex.lastIndex = 0;
+          isInvalid = !regex.test(value);
+        } catch {
+          isInvalid = false;
+        }
       } else if (rule.type === 'custom') {
         const validatorId = rule.customValidatorId || rule.id;
         const passed = validationRegistry.validate(validatorId, value, rule);
@@ -204,12 +214,23 @@ export const useGuideStore = create<GuideState>((set, get) => ({
     if (!config) return true;
 
     let allValid = true;
+    let firstFailedError: string | null = null;
     const keys = Object.keys(config.components);
     for (const key of keys) {
       const isValid = get().validateField(key);
       if (!isValid) {
         allValid = false;
+        if (!firstFailedError) {
+          firstFailedError = get().fieldErrors[key];
+        }
       }
+    }
+
+    if (!allValid) {
+      set({
+        currentExpression: 'error',
+        currentMessage: firstFailedError || config.globalFallbacks?.defaultError || 'Please resolve form errors.',
+      });
     }
 
     get().logTelemetry('form', 'form_submit', { allValid });
@@ -247,8 +268,8 @@ export const useGuideStore = create<GuideState>((set, get) => ({
   },
 
   nextTourStep: () => {
-    const { config, tourStep } = get();
-    if (!config) return;
+    const { config, tourStep, tourActive } = get();
+    if (!config || !tourActive) return;
 
     const totalSteps = Object.values(config.components).filter((c) => Boolean(c.walkthrough)).length;
     const nextStepNum = tourStep + 1;
@@ -274,8 +295,8 @@ export const useGuideStore = create<GuideState>((set, get) => ({
   },
 
   prevTourStep: () => {
-    const { config, tourStep } = get();
-    if (!config || tourStep <= 1) return;
+    const { config, tourStep, tourActive } = get();
+    if (!config || !tourActive || tourStep <= 1) return;
 
     const prevStepNum = tourStep - 1;
     const targetKey = Object.keys(config.components).find(
