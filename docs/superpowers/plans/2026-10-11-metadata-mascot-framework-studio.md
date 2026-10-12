@@ -1,6 +1,6 @@
 # Metadata-Driven Mascot Framework & Studio Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Build a production-grade, pluggable metadata-driven mascot framework and developer studio in React, TypeScript, Tailwind CSS, Zustand, and Floating UI, complete with a Makefile, multi-mascot vector engines, dual tour providers, devtools inspector, and automated test suite.
 
@@ -36,19 +36,19 @@
 **Interfaces:**
 - Produces: Runnable development environment and build pipeline verified via `make dev`, `make build`, and `make test`.
 
-- [ ] **Step 1: Create package.json with dependencies**
+- [x] **Step 1: Create package.json with dependencies**
 Define dependencies (`react`, `react-dom`, `zustand`, `@floating-ui/react`, `driver.js`, `lucide-react`) and devDependencies (`vite`, `@vitejs/plugin-react`, `tailwindcss`, `postcss`, `autoprefixer`, `typescript`, `vitest`, `@testing-library/react`, `jsdom`).
 
-- [ ] **Step 2: Create TypeScript and Vite configurations**
+- [x] **Step 2: Create TypeScript and Vite configurations**
 Set up `tsconfig.json`, `tsconfig.node.json`, and `vite.config.ts` configured with React and Vitest environment `jsdom`.
 
-- [ ] **Step 3: Create Tailwind and PostCSS configurations**
+- [x] **Step 3: Create Tailwind and PostCSS configurations**
 Set up `tailwind.config.js`, `postcss.config.js`, and `src/index.css` with dark theme foundations, custom glow utilities, and keyframe animations.
 
-- [ ] **Step 4: Create Makefile**
+- [x] **Step 4: Create Makefile**
 Set up standard targets (`help`, `install`, `dev`, `build`, `test`, `lint`, `preview`, `clean`).
 
-- [ ] **Step 5: Run npm install and verify make commands**
+- [x] **Step 5: Run npm install and verify make commands**
 Run `npm install` and verify `make lint` / `make build` pass on empty scaffold.
 
 ---
@@ -61,10 +61,10 @@ Run `npm install` and verify `make lint` / `make build` pass on empty scaffold.
 **Interfaces:**
 - Produces: `MascotExpression`, `ValidationRule`, `ComponentMetadata`, `GuideConfig`, `TelemetryEvent`, `MascotDefinition`, `TourStep`, `TourProvider`.
 
-- [ ] **Step 1: Define types file**
+- [x] **Step 1: Define types file**
 Write complete types for expressions, validations, component metadata, walkthrough tour steps, and telemetry events as specified in the design doc.
 
-- [ ] **Step 2: Verify type check passes**
+- [x] **Step 2: Verify type check passes**
 Run `npx tsc --noEmit` to confirm no syntax or type errors.
 
 ---
@@ -82,16 +82,16 @@ Run `npx tsc --noEmit` to confirm no syntax or type errors.
 - Consumes: `guide-framework.ts` types.
 - Produces: `mascotRegistry`, `validationRegistry`, `tourRegistry`, `telemetryPipeline` singletons and methods (`registerMascot`, `registerValidator`, `registerTourProvider`, `addTelemetrySink`).
 
-- [ ] **Step 1: Write failing tests for registries**
+- [x] **Step 1: Write failing tests for registries**
 Write unit tests verifying registration and retrieval of mascots, custom validators, tour providers, and telemetry broadcast.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run `npx vitest run tests/registries.test.ts`. Expected: FAIL (files missing).
 
-- [ ] **Step 3: Implement registries and telemetry pipeline**
+- [x] **Step 3: Implement registries and telemetry pipeline**
 Implement each registry with type-safe maps, fallback defaults, and subscriber callbacks.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 Run `npx vitest run tests/registries.test.ts`. Expected: PASS.
 
 ---
@@ -106,16 +106,16 @@ Run `npx vitest run tests/registries.test.ts`. Expected: PASS.
 - Consumes: `guide-framework.ts`, `validationRegistry.ts`, `telemetryPipeline.ts`.
 - Produces: `useGuideStore` hook and `guideStore` API (`setFieldValue`, `setActiveComponent`, `startTour`, `nextTourStep`, `prevTourStep`, `endTour`, `setMascot`, `setTourProvider`, `resetForm`, `setConfig`).
 
-- [ ] **Step 1: Write failing tests for guideStore**
+- [x] **Step 1: Write failing tests for guideStore**
 Test field validation runner (`required`, `email`, `min_length`, regex, custom validator), state updates, error clearing, active component focus, and telemetry emission.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 Run `npx vitest run tests/store.test.ts`. Expected: FAIL.
 
-- [ ] **Step 3: Implement guideStore with Zustand**
+- [x] **Step 3: Implement guideStore with Zustand**
 Implement state interface, actions, and validation engine hooking into `validationRegistry` and broadcasting to `telemetryPipeline`.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 Run `npx vitest run tests/store.test.ts`. Expected: PASS.
 
 ---
@@ -128,10 +128,10 @@ Run `npx vitest run tests/store.test.ts`. Expected: PASS.
 **Interfaces:**
 - Produces: `synthAudio` singleton with `playFocus()`, `playSuccess()`, `playError()`, `playFanfare()`, `toggleMute()`, `isMuted()`.
 
-- [ ] **Step 1: Implement Web Audio API procedural sound synthesizer**
+- [x] **Step 1: Implement Web Audio API procedural sound synthesizer**
 Create safe AudioContext manager with gentle sine/triangle oscillators for friendly UI feedback tones. Gracefully handles SSR or browser autoplay restrictions.
 
-- [ ] **Step 2: Verify type check passes**
+- [x] **Step 2: Verify type check passes**
 Run `npx tsc --noEmit`.
 
 ---
@@ -149,16 +149,16 @@ Run `npx tsc --noEmit`.
 - Consumes: `MascotExpression`, `MascotProps`, `mascotRegistry`.
 - Produces: Renderers for Nova, Byte, and Pip with mathematical mouse eye-tracking, dynamic expression facial rigging, and registration in `mascotRegistry`.
 
-- [ ] **Step 1: Implement NovaMascot (Cosmic Spark)**
+- [x] **Step 1: Implement NovaMascot (Cosmic Spark)**
 Procedural SVG with fluid body gradient, pulsing antenna bulb, blushing cheeks, dynamic pupil coordinates, and expression styling.
 
-- [ ] **Step 2: Implement ByteMascot (Cyber Droid)**
+- [x] **Step 2: Implement ByteMascot (Cyber Droid)**
 Retro robot SVG with CRT screen face, digital matrix LED eyes, dual antennas, and cyan/neon glowing shaders.
 
-- [ ] **Step 3: Implement PipMascot (Sage Owl)**
+- [x] **Step 3: Implement PipMascot (Sage Owl)**
 Geometric avian mascot with tilting head, large circular owl lenses, expressive feather tufts, and violet/amber gradient body.
 
-- [ ] **Step 4: Register all three mascots in mascotRegistry**
+- [x] **Step 4: Register all three mascots in mascotRegistry**
 Write `initMascots.ts` and verify registration via unit test.
 
 ---
@@ -173,13 +173,13 @@ Write `initMascots.ts` and verify registration via unit test.
 - Consumes: `useGuideStore`, `mascotRegistry`, `@floating-ui/react`.
 - Produces: `<GuideBubble targetElement={...} />` component.
 
-- [ ] **Step 1: Write test for GuideBubble formatting and a11y live region**
+- [x] **Step 1: Write test for GuideBubble formatting and a11y live region**
 Verify `role="status"` and `aria-live="polite"` presence.
 
-- [ ] **Step 2: Implement GuideBubble with @floating-ui/react**
+- [x] **Step 2: Implement GuideBubble with @floating-ui/react**
 Integrate `useFloating` with `autoUpdate`, `offset(14)`, `flip()`, `shift({ padding: 12 })`, dynamic directional tail pointer, active mascot renderer, and typewriter effect.
 
-- [ ] **Step 3: Run test to verify it passes**
+- [x] **Step 3: Run test to verify it passes**
 Run `npx vitest run tests/bubble.test.ts`. Expected: PASS.
 
 ---
@@ -196,16 +196,16 @@ Run `npx vitest run tests/bubble.test.ts`. Expected: PASS.
 - Consumes: `TourProvider` interface, `tourRegistry`, `driver.js`.
 - Produces: Both Native SVG Spotlight overlay and Driver.js tour execution.
 
-- [ ] **Step 1: Write unit test for Tour state and navigation**
+- [x] **Step 1: Write unit test for Tour state and navigation**
 Verify step progression, boundary clamping, and completion callbacks.
 
-- [ ] **Step 2: Implement NativeSpotlightProvider and SVG overlay component**
+- [x] **Step 2: Implement NativeSpotlightProvider and SVG overlay component**
 Implement SVG mask cutout calculating bounding rect of target element, smooth scroll-into-view, and animated beacon ring.
 
-- [ ] **Step 3: Implement DriverJsProvider**
+- [x] **Step 3: Implement DriverJsProvider**
 Wrap `driver.js` with dark theme styling, integrating with guide store so mascot tracks active driver popover step.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 Run `npx vitest run tests/tour.test.ts`. Expected: PASS.
 
 ---
@@ -221,10 +221,10 @@ Run `npx vitest run tests/tour.test.ts`. Expected: PASS.
 - Consumes: `useGuideStore`, metadata configuration.
 - Produces: `<GuidedField componentId="..." />` and full agency onboarding form demo.
 
-- [ ] **Step 1: Implement GuidedField component**
+- [x] **Step 1: Implement GuidedField component**
 Support text, email, select, textarea with metadata labels, required indicator, inline errors, focus tracking, and floating bubble anchor ref.
 
-- [ ] **Step 2: Implement PlaygroundForm**
+- [x] **Step 2: Implement PlaygroundForm**
 Build agency registration form card with Full Name, Work Email, Company Size, and a Custom Field demo showing pluggable validation.
 
 ---
@@ -246,17 +246,17 @@ Build agency registration form card with Full Name, Work Email, Company Size, an
 - Consumes: All framework and mascot components.
 - Produces: Full interactive studio application.
 
-- [ ] **Step 1: Implement HeaderBar with quick controls**
+- [x] **Step 1: Implement HeaderBar with quick controls**
 Mascot dropdown, tour engine toggle, audio mute switch, Start Tour button, Reset Form button, Export JSON button.
 
-- [ ] **Step 2: Implement 5 Inspector Tabs**
+- [x] **Step 2: Implement 5 Inspector Tabs**
 1. TelemetryTab: Live event feed with action badges, payload inspection, filtering, and copy-to-clipboard.
 2. SchemaEditorTab: Live editable JSON editor with syntax error detection, preset picker (Agency, SaaS Checkout, DevOps CLI), and instant Apply button.
 3. StateStoreTab: Live reactive view of Zustand store.
 4. PluginsTab: Directory of registered mascots, validators, tour engines, and telemetry sinks with interactive custom validator registration demo.
 5. EmotionSandboxTab: Grid of emotion buttons to trigger expressions on demand.
 
-- [ ] **Step 3: Assemble StudioApp**
+- [x] **Step 3: Assemble StudioApp**
 Layout with header, left column (mascot floating speech bubble + interactive form), right column (sticky DevTools inspector), and footer.
 
 ---
@@ -269,14 +269,14 @@ Layout with header, left column (mascot floating speech bubble + interactive for
 - Verify: `make build`
 - Verify: Dev server and browser rendering via Chrome DevTools / Playwright.
 
-- [ ] **Step 1: Run full test suite via Makefile**
+- [x] **Step 1: Run full test suite via Makefile**
 Run `make test`. Confirm 100% test pass.
 
-- [ ] **Step 2: Run linter and typecheck via Makefile**
+- [x] **Step 2: Run linter and typecheck via Makefile**
 Run `make lint`. Confirm 0 errors.
 
-- [ ] **Step 3: Run production build via Makefile**
+- [x] **Step 3: Run production build via Makefile**
 Run `make build`. Confirm clean bundle output.
 
-- [ ] **Step 4: Launch dev server and inspect in browser**
+- [x] **Step 4: Launch dev server and inspect in browser**
 Run dev server and test mascot animation, eye tracking, validation reactions, tour execution, and devtools tabs.
