@@ -149,8 +149,8 @@ export const useGuideStore = create<GuideState>((set, get) => ({
 
       if (rule.type === 'required') {
         isInvalid = !value.trim();
-      } else if (!value.trim() && (rule.type === 'min_length' || rule.type === 'email' || rule.type === 'regex')) {
-        // Skip format validation if empty and not required
+      } else if (!value.trim()) {
+        // Skip format and custom validation if empty and not required
         continue;
       } else if (rule.type === 'min_length') {
         const minLen = Number(rule.value) || 0;
@@ -158,7 +158,7 @@ export const useGuideStore = create<GuideState>((set, get) => ({
       } else if (rule.type === 'email') {
         isInvalid = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
       } else if (rule.type === 'regex') {
-        if (!rule.value) continue;
+        if (rule.value == null || rule.value === '') continue;
         try {
           const regex = rule.value instanceof RegExp ? rule.value : new RegExp(String(rule.value));
           regex.lastIndex = 0;

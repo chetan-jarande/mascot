@@ -268,4 +268,13 @@ describe('GuideStore & Validation Engine', () => {
     useGuideStore.getState().setFieldValue('phone-field', 'abc-defg');
     expect(useGuideStore.getState().fieldErrors['phone-field']).toBe('Format must be 123-4567.');
   });
+
+  it('keeps error expression after validateAll if any field fails', () => {
+    useGuideStore.getState().initialize(testConfig);
+    const store = useGuideStore.getState();
+    store.setFieldValue('user-email', 'valid@company.com');
+    const allValid = store.validateAll(); // user-name is still empty
+    expect(allValid).toBe(false);
+    expect(useGuideStore.getState().currentExpression).toBe('error');
+  });
 });
