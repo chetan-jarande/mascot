@@ -26,21 +26,21 @@ describe('Pluggable Vector Mascot Roster', () => {
   it('renders NovaMascot with vector SVG elements', () => {
     const { container } = render(React.createElement(NovaMascot, { expression: 'happy' }));
     const svg = container.querySelector('svg');
-    expect(svg).toBeDefined();
+    expect(svg).not.toBeNull();
     expect(svg?.getAttribute('viewBox')).toBe('0 0 120 120');
   });
 
   it('renders ByteMascot with CRT screen face and matrix styling', () => {
     const { container } = render(React.createElement(ByteMascot, { expression: 'error' }));
     const svg = container.querySelector('svg');
-    expect(svg).toBeDefined();
+    expect(svg).not.toBeNull();
     expect(svg?.getAttribute('viewBox')).toBe('0 0 120 120');
   });
 
   it('renders PipMascot with geometric owl plumage and lenses', () => {
     const { container } = render(React.createElement(PipMascot, { expression: 'thinking' }));
     const svg = container.querySelector('svg');
-    expect(svg).toBeDefined();
+    expect(svg).not.toBeNull();
     expect(svg?.getAttribute('viewBox')).toBe('0 0 120 120');
   });
 });

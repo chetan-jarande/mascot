@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useId } from 'react';
 import type { MascotRendererProps, MascotExpression } from './types';
 
 interface ByteColors {
@@ -79,25 +79,36 @@ export const ByteMascot: React.FC<MascotRendererProps> = ({
 }) => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const gradId = useId();
+  const patternId = useId();
 
   useEffect(() => {
+    let rafId: number | null = null;
+
     const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
+      if (rafId !== null) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null;
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
 
-      const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
-      const dist = Math.min(5, Math.hypot(e.clientX - centerX, e.clientY - centerY) / 32);
+        const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+        const dist = Math.min(5, Math.hypot(e.clientX - centerX, e.clientY - centerY) / 32);
 
-      setMousePos({
-        x: Math.cos(angle) * dist,
-        y: Math.sin(angle) * dist,
+        setMousePos({
+          x: Math.cos(angle) * dist,
+          y: Math.sin(angle) * dist,
+        });
       });
     };
 
     window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const colors = getByteColors(expression);
@@ -117,11 +128,11 @@ export const ByteMascot: React.FC<MascotRendererProps> = ({
 
       <svg className="w-full h-full relative z-10 drop-shadow-2xl" viewBox="0 0 120 120">
         <defs>
-          <linearGradient id="byteChassisGrad" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#334155" />
             <stop offset="100%" stopColor="#0F172A" />
           </linearGradient>
-          <pattern id="scanlines" width="100" height="4" patternUnits="userSpaceOnUse">
+          <pattern id={patternId} width="100" height="4" patternUnits="userSpaceOnUse">
             <line x1="0" y1="0" x2="100" y2="0" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
           </pattern>
         </defs>
@@ -140,7 +151,7 @@ export const ByteMascot: React.FC<MascotRendererProps> = ({
           width="80"
           height="70"
           rx="14"
-          fill="url(#byteChassisGrad)"
+          fill={`url(#${gradId})`}
           stroke="#475569"
           strokeWidth="2.5"
         />
@@ -161,7 +172,7 @@ export const ByteMascot: React.FC<MascotRendererProps> = ({
           strokeWidth="1.5"
         />
         {/* Scanline Overlay */}
-        <rect x="28" y="36" width="64" height="52" rx="8" fill="url(#scanlines)" />
+        <rect x="28" y="36" width="64" height="52" rx="8" fill={`url(#${patternId})`} />
 
         {/* Digital Matrix Eyes with Mouse Tracking */}
         <g
@@ -210,7 +221,7 @@ export const ByteMascot: React.FC<MascotRendererProps> = ({
             </>
           )}
 
-          {/* Matrix Mouth / Audio Equalizer Bar */}
+          {/* Matrix Mouth / Audio Equalizer Bar with isTalking Support */}
           {isTalking ? (
             <g fill={colors.led}>
               <rect x="44" y="73" width="6" height="6" rx="1" />

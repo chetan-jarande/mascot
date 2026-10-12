@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useId } from 'react';
 import type { MascotRendererProps, MascotExpression } from './types';
 
 interface PipColors {
@@ -79,25 +79,35 @@ export const PipMascot: React.FC<MascotRendererProps> = ({
 }) => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const gradId = useId();
 
   useEffect(() => {
+    let rafId: number | null = null;
+
     const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
+      if (rafId !== null) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null;
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
 
-      const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
-      const dist = Math.min(6, Math.hypot(e.clientX - centerX, e.clientY - centerY) / 30);
+        const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+        const dist = Math.min(6, Math.hypot(e.clientX - centerX, e.clientY - centerY) / 30);
 
-      setMousePos({
-        x: Math.cos(angle) * dist,
-        y: Math.sin(angle) * dist,
+        setMousePos({
+          x: Math.cos(angle) * dist,
+          y: Math.sin(angle) * dist,
+        });
       });
     };
 
     window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const colors = getPipColors(expression);
@@ -117,7 +127,7 @@ export const PipMascot: React.FC<MascotRendererProps> = ({
 
       <svg className="w-full h-full relative z-10 drop-shadow-2xl" viewBox="0 0 120 120">
         <defs>
-          <radialGradient id="pipBodyGrad" cx="35%" cy="35%" r="70%">
+          <radialGradient id={gradId} cx="35%" cy="35%" r="70%">
             <stop offset="0%" stopColor="#818CF8" stopOpacity="0.6" />
             <stop offset="60%" stopColor={colors.body} />
             <stop offset="100%" stopColor="#0F172A" />
@@ -129,7 +139,7 @@ export const PipMascot: React.FC<MascotRendererProps> = ({
         <polygon points="88,24 96,12 80,20" fill={colors.body} />
 
         {/* Owl Body Egg Contour */}
-        <ellipse cx="60" cy="65" rx="42" ry="46" fill="url(#pipBodyGrad)" />
+        <ellipse cx="60" cy="65" rx="42" ry="46" fill={`url(#${gradId})`} />
 
         {/* Belly Plume */}
         <ellipse cx="60" cy="74" rx="26" ry="28" fill={colors.belly} opacity="0.9" />
@@ -139,11 +149,11 @@ export const PipMascot: React.FC<MascotRendererProps> = ({
         <path d="M 50,76 Q 60,80 70,76" fill="none" stroke={colors.body} strokeWidth="2" strokeLinecap="round" />
         <path d="M 54,86 Q 60,89 66,86" fill="none" stroke={colors.body} strokeWidth="2" strokeLinecap="round" />
 
-        {/* Eyeglass Frames */}
-        <circle cx="44" cy="48" r="17" fill="#1E1B4B" stroke="#FDE047" strokeWidth="2.5" />
-        <circle cx="76" cy="48" r="17" fill="#1E1B4B" stroke="#FDE047" strokeWidth="2.5" />
-        {/* Bridge */}
-        <path d="M 61,48 Q 60,45 59,48" stroke="#FDE047" strokeWidth="2.5" fill="none" />
+        {/* Eyeglass Frames with Adjusted Centers & Radius to Prevent Overlap */}
+        <circle cx="45" cy="48" r="14" fill="#1E1B4B" stroke="#FDE047" strokeWidth="2.5" />
+        <circle cx="75" cy="48" r="14" fill="#1E1B4B" stroke="#FDE047" strokeWidth="2.5" />
+        {/* Bridge cleanly between 59 and 61 */}
+        <path d="M 59,48 Q 60,45 61,48" stroke="#FDE047" strokeWidth="2.5" fill="none" />
 
         {/* Big Inquisitive Eyes & Pupils with Mouse Tracking */}
         <g
@@ -153,51 +163,51 @@ export const PipMascot: React.FC<MascotRendererProps> = ({
           {expression === 'error' ? (
             /* Angled Worried Lenses */
             <>
-              <line x1="36" y1="42" x2="52" y2="54" stroke={colors.lens} strokeWidth="3.5" strokeLinecap="round" />
-              <line x1="52" y1="42" x2="36" y2="54" stroke={colors.lens} strokeWidth="3.5" strokeLinecap="round" />
-              <line x1="68" y1="42" x2="84" y2="54" stroke={colors.lens} strokeWidth="3.5" strokeLinecap="round" />
-              <line x1="84" y1="42" x2="68" y2="54" stroke={colors.lens} strokeWidth="3.5" strokeLinecap="round" />
+              <line x1="38" y1="42" x2="52" y2="54" stroke={colors.lens} strokeWidth="3.5" strokeLinecap="round" />
+              <line x1="52" y1="42" x2="38" y2="54" stroke={colors.lens} strokeWidth="3.5" strokeLinecap="round" />
+              <line x1="68" y1="42" x2="82" y2="54" stroke={colors.lens} strokeWidth="3.5" strokeLinecap="round" />
+              <line x1="82" y1="42" x2="68" y2="54" stroke={colors.lens} strokeWidth="3.5" strokeLinecap="round" />
             </>
           ) : expression === 'happy' || expression === 'celebrating' ? (
             /* Cheerful Arcs ^ ^ */
             <>
-              <path d="M 37,50 Q 44,40 51,50" fill="none" stroke="#FACC15" strokeWidth="4" strokeLinecap="round" />
-              <path d="M 69,50 Q 76,40 83,50" fill="none" stroke="#FACC15" strokeWidth="4" strokeLinecap="round" />
+              <path d="M 38,50 Q 45,41 52,50" fill="none" stroke="#FACC15" strokeWidth="3.5" strokeLinecap="round" />
+              <path d="M 68,50 Q 75,41 82,50" fill="none" stroke="#FACC15" strokeWidth="3.5" strokeLinecap="round" />
             </>
           ) : expression === 'surprised' ? (
             /* Wide Dilated Golden Eyes */
             <>
-              <circle cx="44" cy="48" r="10" fill="#FACC15" />
-              <circle cx="44" cy="48" r="5" fill="#0F172A" />
-              <circle cx="76" cy="48" r="10" fill="#FACC15" />
-              <circle cx="76" cy="48" r="5" fill="#0F172A" />
+              <circle cx="45" cy="48" r="9" fill="#FACC15" />
+              <circle cx="45" cy="48" r="4.5" fill="#0F172A" />
+              <circle cx="75" cy="48" r="9" fill="#FACC15" />
+              <circle cx="75" cy="48" r="4.5" fill="#0F172A" />
             </>
           ) : (
             /* Wise Owl Glass Lens Pupils */
             <>
-              <circle cx="44" cy="48" r="9" fill="#FDE047" />
-              <circle cx="44" cy="48" r="5" fill="#0F172A" />
-              <circle cx="42" cy="45" r="2" fill="#FFFFFF" />
-              <circle cx="76" cy="48" r="9" fill="#FDE047" />
-              <circle cx="76" cy="48" r="5" fill="#0F172A" />
-              <circle cx="74" cy="45" r="2" fill="#FFFFFF" />
+              <circle cx="45" cy="48" r="8" fill="#FDE047" />
+              <circle cx="45" cy="48" r="4.5" fill="#0F172A" />
+              <circle cx="43" cy="45" r="1.8" fill="#FFFFFF" />
+              <circle cx="75" cy="48" r="8" fill="#FDE047" />
+              <circle cx="75" cy="48" r="4.5" fill="#0F172A" />
+              <circle cx="73" cy="45" r="1.8" fill="#FFFFFF" />
             </>
           )}
-
-          {/* Golden Beak */}
-          <polygon
-            points={
-              isTalking
-                ? '55,56 65,56 60,67'
-                : expression === 'error'
-                ? '56,58 64,58 60,65'
-                : '55,56 65,56 60,65'
-            }
-            fill={colors.beak}
-            stroke="#B45309"
-            strokeWidth="1"
-          />
         </g>
+
+        {/* Golden Beak Anchored Centrally to Face */}
+        <polygon
+          points={
+            isTalking
+              ? '55,56 65,56 60,68'
+              : expression === 'error'
+              ? '56,58 64,58 60,65'
+              : '55,56 65,56 60,65'
+          }
+          fill={colors.beak}
+          stroke="#B45309"
+          strokeWidth="1"
+        />
 
         {/* Small Talons */}
         <ellipse cx="48" cy="107" rx="6" ry="3" fill="#D97706" />

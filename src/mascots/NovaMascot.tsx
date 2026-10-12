@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useId } from 'react';
 import type { MascotRendererProps, MascotExpression } from './types';
 
 interface AvatarColors {
@@ -35,25 +35,35 @@ export const NovaMascot: React.FC<MascotRendererProps> = ({
 }) => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const gradId = useId();
 
   useEffect(() => {
+    let rafId: number | null = null;
+
     const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
+      if (rafId !== null) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null;
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
 
-      const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
-      const dist = Math.min(7, Math.hypot(e.clientX - centerX, e.clientY - centerY) / 28);
+        const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+        const dist = Math.min(7, Math.hypot(e.clientX - centerX, e.clientY - centerY) / 28);
 
-      setMousePos({
-        x: Math.cos(angle) * dist,
-        y: Math.sin(angle) * dist,
+        setMousePos({
+          x: Math.cos(angle) * dist,
+          y: Math.sin(angle) * dist,
+        });
       });
     };
 
     window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const colors = getColors(expression);
@@ -73,7 +83,7 @@ export const NovaMascot: React.FC<MascotRendererProps> = ({
 
       <svg className="w-full h-full relative z-10 drop-shadow-2xl" viewBox="0 0 120 120">
         <defs>
-          <radialGradient id="novaBodyGrad" cx="35%" cy="30%" r="70%">
+          <radialGradient id={gradId} cx="35%" cy="30%" r="70%">
             <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.45" />
             <stop offset="50%" stopColor={colors.body} />
             <stop offset="100%" stopColor={colors.accent} />
@@ -96,7 +106,7 @@ export const NovaMascot: React.FC<MascotRendererProps> = ({
         {/* Main Blob Body */}
         <path
           d="M 60 25 C 90 25, 105 45, 105 70 C 105 95, 85 105, 60 105 C 35 105, 15 95, 15 70 C 15 45, 30 25, 60 25 Z"
-          fill="url(#novaBodyGrad)"
+          fill={`url(#${gradId})`}
           className="transition-all duration-300"
         />
 
@@ -141,12 +151,11 @@ export const NovaMascot: React.FC<MascotRendererProps> = ({
           <ellipse cx="36" cy="66" rx="5" ry="3" fill="#F43F5E" opacity="0.45" />
           <ellipse cx="84" cy="66" rx="5" ry="3" fill="#F43F5E" opacity="0.45" />
 
-          {/* Dynamic Mouth */}
-          {expression === 'happy' || expression === 'celebrating' ? (
-            <path
-              d={isTalking ? 'M 48 70 Q 60 86 72 70 Z' : 'M 48 72 Q 60 84 72 72 Z'}
-              fill="#064E3B"
-            />
+          {/* Dynamic Mouth with isTalking Support */}
+          {isTalking ? (
+            <ellipse cx="60" cy="76" rx="7" ry="5" fill="#0F172A" className="animate-pulse" />
+          ) : expression === 'happy' || expression === 'celebrating' ? (
+            <path d="M 48 72 Q 60 84 72 72 Z" fill="#064E3B" />
           ) : expression === 'error' ? (
             <path d="M 48 76 Q 60 68 72 76" fill="none" stroke="#7F1D1D" strokeWidth="3.5" strokeLinecap="round" />
           ) : expression === 'surprised' ? (
