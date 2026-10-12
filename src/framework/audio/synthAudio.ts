@@ -7,7 +7,6 @@ export class SynthAudio {
   private muted: boolean = false;
 
   constructor() {
-    // Check localStorage if available
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
         const stored = window.localStorage.getItem('mascot_sound_muted');
@@ -22,12 +21,16 @@ export class SynthAudio {
 
   private getContext(): AudioContext | null {
     if (typeof window === 'undefined') return null;
-    if (!this.ctx) {
-      const AudioContextClass =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (AudioContextClass) {
-        this.ctx = new AudioContextClass();
+    if (!this.ctx || this.ctx.state === 'closed') {
+      try {
+        const AudioContextClass =
+          window.AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        if (AudioContextClass) {
+          this.ctx = new AudioContextClass();
+        }
+      } catch {
+        this.ctx = null;
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
@@ -60,28 +63,39 @@ export class SynthAudio {
     freq: number,
     durationMs: number,
     type: OscillatorType = 'sine',
-    startGain: number = 0.05
+    startGain: number = 0.05,
+    delaySec: number = 0
   ): void {
     if (this.muted) return;
     const ctx = this.getContext();
     if (!ctx) return;
 
     try {
-      const now = ctx.currentTime;
+      const startTime = ctx.currentTime + delaySec;
+      const stopTime = startTime + durationMs / 1000;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
 
       osc.type = type;
-      osc.frequency.setValueAtTime(freq, now);
+      osc.frequency.setValueAtTime(freq, startTime);
 
-      gain.gain.setValueAtTime(startGain, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + durationMs / 1000);
+      gain.gain.setValueAtTime(startGain, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, stopTime);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
 
-      osc.start(now);
-      osc.stop(now + durationMs / 1000);
+      osc.onended = () => {
+        try {
+          osc.disconnect();
+          gain.disconnect();
+        } catch {
+          // Ignore
+        }
+      };
+
+      osc.start(startTime);
+      osc.stop(stopTime);
     } catch {
       // Safely ignore audio generation failures
     }
@@ -93,51 +107,27 @@ export class SynthAudio {
 
   public playSuccess(): void {
     if (this.muted) return;
-    const ctx = this.getContext();
-    if (!ctx) return;
-
-    try {
-      const notes = [587.33, 739.99, 880]; // D5, F#5, A5 chord
-      notes.forEach((freq, idx) => {
-        setTimeout(() => {
-          this.playTone(freq, 120, 'sine', 0.04);
-        }, idx * 60);
-      });
-    } catch {
-      // Ignore
-    }
+    // Arpeggiated cheerful major chord (D5, F#5, A5) scheduled directly on audio timeline
+    const notes = [587.33, 739.99, 880];
+    notes.forEach((freq, idx) => {
+      this.playTone(freq, 120, 'sine', 0.04, idx * 0.06);
+    });
   }
 
   public playError(): void {
     if (this.muted) return;
-    const ctx = this.getContext();
-    if (!ctx) return;
-
-    try {
-      this.playTone(220, 100, 'triangle', 0.05);
-      setTimeout(() => {
-        this.playTone(185, 120, 'triangle', 0.05);
-      }, 70);
-    } catch {
-      // Ignore
-    }
+    // Soft low double warning blip scheduled directly on audio timeline
+    this.playTone(220, 100, 'triangle', 0.05, 0);
+    this.playTone(185, 120, 'triangle', 0.05, 0.07);
   }
 
   public playFanfare(): void {
     if (this.muted) return;
-    const ctx = this.getContext();
-    if (!ctx) return;
-
-    try {
-      const arpeggio = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
-      arpeggio.forEach((freq, idx) => {
-        setTimeout(() => {
-          this.playTone(freq, 160, 'sine', 0.05);
-        }, idx * 80);
-      });
-    } catch {
-      // Ignore
-    }
+    // Celebratory ascending sequence (C5, E5, G5, C6) scheduled on audio timeline
+    const arpeggio = [523.25, 659.25, 783.99, 1046.5];
+    arpeggio.forEach((freq, idx) => {
+      this.playTone(freq, 160, 'sine', 0.05, idx * 0.08);
+    });
   }
 }
 
